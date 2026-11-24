@@ -1,0 +1,32 @@
+# PDF 解析增强配置（文本 + 表格 + 图片识别）
+# 说明：改完这里不用改代码，重新入库即可生效（见项目根目录的“重建知识库.bat”）
+
+enabled: true                 # 总开关：false 时退回原来的“只读文字”模式
+
+extract_text: true            # 抽取每页正文
+extract_tables: true          # 抽取表格 → 转成 Markdown 文本入库
+extract_images: true          # 抽取图片 → 用 通义千问VL 识别成文字描述后入库
+
+# 图片识别（多模态大模型）
+describe_images: true
+vlm_model: qwen3-vl-plus      # 当前 Key 实测可用的多模态模型（qwen-vl-max 等会 403）
+vlm_prompt: >
+  你是文档图片识别助手。请识别这张从 PDF 里截出来的图片：
+  1) 如果图片里以文字为主，请完整提取文字（保持原有顺序，不要总结）；
+  2) 如果图片是表格，请直接用 Markdown 表格转写（保留表头和每一行）；
+  3) 如果是示意图、流程图、曲线图、产品图，请用 1~3 句话说明它表达的关键信息（例如数值、结论、型号）。
+  只输出识别结果本身，不要解释你在做什么，不要编造看不到的内容。
+
+# 图片落盘目录（相对项目根目录）
+image_output_dir: data/pdf_images
+min_image_width: 80           # 小于这个宽/高的图当作图标，跳过
+min_image_height: 80
+max_images_per_page: 5        # 每页最多识别几张图（控制 API 花费）
+
+# 扫描件兜底：某页几乎没有文字、也没有内嵌图片时，把整页渲染成图片再识别
+render_scanned_page: true
+min_text_chars: 30
+render_dpi: 150
+
+# 可选：这里不填就走系统环境变量 DASHSCOPE_API_KEY
+dashscope_api_key: ""
